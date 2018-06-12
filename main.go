@@ -56,8 +56,11 @@ func SendEth(scanner *bufio.Scanner, privKey string) {
 		tokens := big.NewInt(TokensToSend)
 		tokens.SetString("50000000000000000000", 10)
 		fmt.Println(tokens.String())
+		auth.Nonce.Add(auth.Nonce, big.NewInt(1))
 		tx, err := sc.Transfer(auth, common.HexToAddress(address), tokens)
 		for err != nil {
+			auth.Nonce.Add(auth.Nonce, big.NewInt(1))
+			
 			fmt.Println(err)
 			time.Sleep(time.Millisecond * time.Duration(100+rand.Intn(1000)))
 			tx, err =  sc.Transfer(auth, common.HexToAddress(address), tokens)
@@ -76,6 +79,7 @@ const ContractAddress = "f4d9f469297d7c6a8c3962aa04ab37d6cfa66ee7"
 
 var mu sync.Mutex
 
+
 func InitSC(privKey string) (*acst.AdviserCasperToken, *ethclient.Client, *bind.TransactOpts, error) {
 	client, err := ethclient.Dial("https://mainnet.infura.io/S60XoLCeh1Z6LM1XiU7G")
 	if err != nil {
@@ -91,8 +95,8 @@ func InitSC(privKey string) (*acst.AdviserCasperToken, *ethclient.Client, *bind.
 	if err != nil {
 		return nil, nil, nil, err
 	}
-
-	auth := bind.NewKeyedTransactor(key)
+	auth := bind.NewKeyedTransactor(key)	
+	
 	//fmt.Println(client.PendingBalanceAt(context.Background(), auth.From))
 	//auth.GasPrice = big.NewInt(250000000)
 	// TODO add comment about constant
